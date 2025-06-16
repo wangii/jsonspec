@@ -12,16 +12,39 @@ import (
 	"github.com/wangii/jsonspec"
 )
 
-func llmCall[T any](sys string, tpl *template.Template, param any) (*T, error) {
+func injectSpec[T any](param any) error {
+	if reflect.TypeOf(param).Kind() != reflect.Ptr {
+		return fmt.Errorf("参数必须是指针")
+	}
+
+	if reflect.TypeOf(param).Elem().Kind() != reflect.Struct {
+		return fmt.Errorf("参数必须是结构体指针")
+	}
+
 	bsspec, err := jsonspec.SpecMarshal(reflect.TypeOf((*T)(nil)).Elem(), "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("生成模型OutSpec参数失败: %v", err)
+		return fmt.Errorf("生成模型OutSpec参数失败: %v", err)
+	}
+
+	p := reflect.ValueOf(param).Elem()
+	f := p.FieldByName("OutSpec")
+
+	if f.IsValid() == false || f.Kind() != reflect.String || !f.CanSet() {
+		return fmt.Errorf("参数缺少OutSpec字段")
 	}
 
 	spec := "```json\n" + string(bsspec) + "\n```"
+	f.Set(reflect.ValueOf(spec))
 
-	p := reflect.ValueOf(param).Elem()
-	p.FieldByName("OutSpec").Set(reflect.ValueOf(spec))
+	return nil
+}
+
+func llmCall[T any](sys string, tpl *template.Template, param any) (*T, error) {
+
+	err := injectSpec[T](param)
+	if err != nil {
+		return nil, err
+	}
 
 	up := bytes.NewBufferString("")
 	_ = tpl.Execute(up, param)
