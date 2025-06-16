@@ -153,13 +153,7 @@ func typeSpecFields(t reflect.Type) structSpecFields {
 
 	for i := range fields {
 		f := &fields[i]
-		if f.typ.Kind() == reflect.Struct {
-			f.encoder = newStructSpecEncoder(f.typ)
-		}
-
-		if f.typ.Kind() == reflect.Slice && f.typ.Elem().Kind() == reflect.Struct {
-			f.encoder = newArraySpecEncoder(newStructSpecEncoder(f.typ.Elem()))
-		}
+		f.encoder = typeSpecEncoder(f.typ)
 	}
 
 	return structSpecFields{fields}

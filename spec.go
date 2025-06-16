@@ -127,7 +127,9 @@ func newTypeSpecEncoder(t reflect.Type) specEncoderFunc {
 	switch t.Kind() {
 	case reflect.Struct:
 		return newStructSpecEncoder(t)
+	case reflect.Array, reflect.Slice:
+		return newArraySpecEncoder(newTypeSpecEncoder(t.Elem()))
 	default:
-		return newUnsupportedTypeSpecEncoder(t)
+		return nil
 	}
 }
