@@ -5,49 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"text/template"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/wangii/jsonspec"
 )
 
-func injectSpec[T any](param any) error {
-	if reflect.TypeOf(param).Kind() != reflect.Ptr {
-		return fmt.Errorf("参数必须是指针")
-	}
+// Constraint that only allows struct types
+// type StructType interface {
+// 	struct{}
+// }
 
-	if reflect.TypeOf(param).Elem().Kind() != reflect.Struct {
-		return fmt.Errorf("参数必须是结构体指针")
-	}
+func llmCall[T, P any](sys string, tpl *template.Template, param P) (*T, error) {
 
-	bsspec, err := jsonspec.SpecMarshal(reflect.TypeOf((*T)(nil)).Elem(), "", "  ")
-	if err != nil {
-		return fmt.Errorf("生成模型OutSpec参数失败: %v", err)
-	}
-
-	p := reflect.ValueOf(param).Elem()
-	f := p.FieldByName("OutSpec")
-
-	if f.IsValid() == false || f.Kind() != reflect.String || !f.CanSet() {
-		return fmt.Errorf("参数缺少OutSpec字段")
-	}
-
-	spec := "```json\n" + string(bsspec) + "\n```"
-	f.Set(reflect.ValueOf(spec))
-
-	return nil
-}
-
-func llmCall[T any](sys string, tpl *template.Template, param any) (*T, error) {
-
-	err := injectSpec[T](param)
+	p, err := jsonspec.AppendSpec[T](param)
 	if err != nil {
 		return nil, err
 	}
 
 	up := bytes.NewBufferString("")
-	_ = tpl.Execute(up, param)
+	_ = tpl.Execute(up, p)
 
 	messages := []openai.ChatCompletionMessage{
 		{

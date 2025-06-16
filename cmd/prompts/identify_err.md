@@ -108,13 +108,13 @@
 题目信息如下：
 
 题目内容：
-{{ .QuestionContent }}  
+{{ .In.QuestionContent }}  
 
 所属小题：
-{{ .SubQuestion }}  
+{{ .In.SubQuestion }}  
 
 学生作答：
-{{ .StudentAnswer }}  
+{{ .In.StudentAnswer }}  
 
 错误原因：
-{{ .ErrorReason }}
+{{ .In.ErrorReason }}

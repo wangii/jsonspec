@@ -4,10 +4,31 @@ package jsonspec
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"sync"
-	_ "unsafe" // for linkname
+	// _ "unsafe" // for linkname
 )
+
+type TPromptParam[T any] struct {
+	In      T
+	OutSpec string
+}
+
+func AppendSpec[T, P any](param P) (*TPromptParam[P], error) {
+
+	bsspec, err := SpecMarshal(reflect.TypeOf((*T)(nil)).Elem(), "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("生成模型OutSpec参数失败: %v", err)
+	}
+
+	spec := "```json\n" + string(bsspec) + "\n```"
+	ret := &TPromptParam[P]{
+		In:      param,
+		OutSpec: spec,
+	}
+	return ret, nil
+}
 
 type encOpts struct {
 	escapeHTML bool

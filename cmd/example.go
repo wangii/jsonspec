@@ -17,6 +17,7 @@ func init() {
 }
 
 func example() {
+
 	type OutSpec struct {
 		Errors []struct {
 			Major       string  `json:"主要维度" spec:"\"主要维度\""`
@@ -25,8 +26,7 @@ func example() {
 		} `json:"错误类型"`
 	}
 
-	res, err := llmCall[OutSpec]("", tplIdentifyErr, &struct {
-		OutSpec         string
+	res, err := llmCall[OutSpec]("", tplIdentifyErr, struct {
 		QuestionContent string
 		SubQuestion     string
 		StudentAnswer   string
