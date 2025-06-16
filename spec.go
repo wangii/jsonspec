@@ -149,8 +149,9 @@ func newTypeSpecEncoder(t reflect.Type) specEncoderFunc {
 	case reflect.Struct:
 		return newStructSpecEncoder(t)
 	case reflect.Array, reflect.Slice:
-		return newArraySpecEncoder(newTypeSpecEncoder(t.Elem()))
-	default:
-		return nil
+		if t.Elem().Kind() == reflect.Struct {
+			return newArraySpecEncoder(newTypeSpecEncoder(t.Elem()))
+		}
 	}
+	return nil
 }

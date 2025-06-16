@@ -19,6 +19,7 @@ func init() {
 func example() {
 
 	type OutSpec struct {
+		Status []string `json:"zh描述" spec:"[\"状态1\", \"状态2\"]"`
 		Errors []struct {
 			Major       string  `json:"主要维度" spec:"\"主要维度\""`
 			Minor       string  `json:"二级维度" spec:"\"二级维度\""`
