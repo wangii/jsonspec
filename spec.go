@@ -40,7 +40,10 @@ type encOpts struct {
 
 func SpecMarshal(t reflect.Type, prefix, indent string) ([]byte, error) {
 	e := newSpecEncodeState()
-	defer specEncodeStatePool.Put(e)
+	defer func() {
+		e.ptrSeen = make(map[any]struct{})
+		specEncodeStatePool.Put(e)
+	}()
 
 	err := e.marshal(t, encOpts{escapeHTML: true, prefix: prefix, indent: indent})
 	if err != nil {
