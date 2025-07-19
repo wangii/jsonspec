@@ -131,6 +131,10 @@ func typeSpecEncoder(t reflect.Type) specEncoderFunc {
 	wg.Add(1)
 	fi, loaded := specEncoderCache.LoadOrStore(t, specEncoderFunc(func(e *specEncodeState, opts encOpts) {
 		wg.Wait()
+		if f == nil {
+			e.error(fmt.Errorf("recursive encoder is nil for type %v", t))
+			return
+		}
 		f(e, opts)
 	}))
 
