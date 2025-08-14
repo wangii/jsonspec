@@ -1,4 +1,4 @@
-package jsonspec
+package main
 
 import "fmt"
 
